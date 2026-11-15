@@ -1,0 +1,54 @@
+name: Genie Code PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  id-token: write       # Required for Databricks OIDC authentication
+  contents: read        # Required to checkout the PR code
+  pull-requests: write  # Required to post the review comment on the PR
+
+jobs:
+  genie-review:
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed to diff against base branch
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Install Genie Code CLI
+        run: |
+          curl -fsSL https://github.com/databricks/genie-code-cli/releases/latest/download/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.genie/bin" >> $GITHUB_PATH
+
+      - name: Run Genie Code Review
+        run: |
+          # Fetch the target base branch for comparison
+          git fetch origin ${{ github.base_ref }}
+
+          # Run Genie headless in a read-only sandbox and save output
+          # Note: '< /dev/null' prevents the CLI from hanging while waiting for stdin
+          genie exec --ephemeral --sandbox read-only \
+            -o review_output.md \
+            "Review the git diff between origin/${{ github.base_ref }} and HEAD. \
+             Follow all rules in AGENTS.md and Databricks best practices. \
+             Rank findings by severity (P0, P1, P2) with file names and line numbers. \
+             If there are no issues, state 'LGTM - No issues found.'" < /dev/null
+
+      - name: Post Review to Pull Request
+        if: always() && hashFiles('review_output.md') != ''
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body-file review_output.md
