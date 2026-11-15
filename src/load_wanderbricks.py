@@ -12,6 +12,7 @@ import sys
 from pyspark.sql import SparkSession
 
 
+# todo: just a comment
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--source-catalog", required=True)
