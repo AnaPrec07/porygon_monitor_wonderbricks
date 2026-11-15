@@ -33,7 +33,9 @@ def main() -> int:
         dst = f"`{args.target_catalog}`.`{args.target_schema}`.`{table}`"
         try:
             df = spark.table(src)
-            df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(dst)
+            df.write.format("delta").mode("overwrite").option(
+                "overwriteSchema", "true"
+            ).saveAsTable(dst)
             src_n, dst_n = df.count(), spark.table(dst).count()
             if src_n != dst_n:
                 raise RuntimeError(f"row count mismatch: source={src_n} target={dst_n}")
@@ -43,7 +45,9 @@ def main() -> int:
             failures.append(table)
 
     if failures:
-        print(f"{len(failures)} table(s) failed: {', '.join(failures)}", file=sys.stderr)
+        print(
+            f"{len(failures)} table(s) failed: {', '.join(failures)}", file=sys.stderr
+        )
         return 1
     print(f"Loaded {len(tables)} tables.")
     return 0
