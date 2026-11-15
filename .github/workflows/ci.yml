@@ -17,4 +17,4 @@ jobs:
       - run: uv sync
       # - run: uv run ruff check .
       # - run: uv run pytest
-      - run: databricks bundle validate -t dev
+      - run: databricks bundle validate -t prod
