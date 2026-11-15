@@ -1,9 +1,28 @@
-# This is a Declarative Automation Bundle definition for porygon_monitor_wonderbricks.
-# The Databricks extension requires databricks.yml configuration file.
-# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+# Declarative Automation Bundle for porygon_monitor_wonderbricks.
+# Docs: https://docs.databricks.com/dev-tools/bundles/index.html
 
 bundle:
   name: porygon_monitor_wonderbricks
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog that receives the loaded tables.
+    default: main
+  schema:
+    description: Schema (created by the bundle) that receives the loaded tables.
+    default: wanderbricks
+  source_catalog:
+    description: Catalog holding the Databricks sample data.
+    default: samples
+  source_schema:
+    description: Schema of the Wanderbricks sample dataset.
+    default: wanderbricks
+  tables:
+    description: Comma-separated list of source tables to load.
+    default: "bookings,booking_updates,properties,hosts,users,destinations,amenities,property_amenities,reviews,payments,page_views,countries"
 
 targets:
   dev:
@@ -12,8 +31,9 @@ targets:
     workspace:
       host: https://dbc-7350f2a1-4fb7.cloud.databricks.com
 
-  ## Optionally, there could be 'staging' or 'prod' targets here.
-  #
+  ## Optionally add a prod target:
   # prod:
+  #   mode: production
   #   workspace:
   #     host: https://dbc-7350f2a1-4fb7.cloud.databricks.com
+  #     root_path: /Workspace/Users/<you>/.bundle/${bundle.name}/${bundle.target}
