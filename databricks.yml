@@ -29,4 +29,10 @@ targets:
     mode: production
     workspace:
       host: https://dbc-7350f2a1-4fb7.cloud.databricks.com
-      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+      root_path: /Workspace/Users/anamargaritapreciado@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - user_name: anamargaritapreciado@gmail.com
+        level: CAN_MANAGE
+      # The CI/CD service principal used by GitHub Actions (Application ID, not a secret)
+      - service_principal_name: fac0c18d-0db4-47f4-a020-99739bf422c7
+        level: CAN_MANAGE
