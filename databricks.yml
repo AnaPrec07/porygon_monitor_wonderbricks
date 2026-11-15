@@ -29,4 +29,4 @@ targets:
     mode: production
     workspace:
       host: https://dbc-7350f2a1-4fb7.cloud.databricks.com
-      root_path: /Workspace/Users/<you>/.bundle/${bundle.name}/${bundle.target}
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
