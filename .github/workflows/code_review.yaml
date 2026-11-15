@@ -32,7 +32,25 @@ jobs:
           curl -fsSL https://github.com/databricks/genie-code-cli/releases/latest/download/install.sh | bash
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           echo "$HOME/.genie/bin" >> $GITHUB_PATH
-
+      - name: Configure Databricks profile (OIDC)
+        run: |
+          cat > ~/.databrickscfg <<EOF
+          [DEFAULT]
+          host      = ${DATABRICKS_HOST}
+          client_id = ${DATABRICKS_CLIENT_ID}
+          auth_type = github-oidc
+          EOF
+          databricks auth describe   # check that OIDC works before calling genie
+      - name: Restore Genie onboarding state
+        env:
+          GENIE_STATE_B64: ${{ secrets.GENIE_STATE_B64 }}
+          LOCAL_REPO_PATH: ${{ vars.LOCAL_REPO_PATH }}
+        run: |
+          echo "$GENIE_STATE_B64" | base64 -d | tar -xzf - -C ~
+          grep -rlF "$LOCAL_REPO_PATH" ~/.genie --exclude-dir=bin \
+            | xargs -r sed -i "s#${LOCAL_REPO_PATH}#${GITHUB_WORKSPACE}#g"
+          genie --version
+          ls -la ~/.genie
       - name: Run Genie Code Review
         run: |
           # Fetch the target base branch for comparison
