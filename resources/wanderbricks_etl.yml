@@ -1,0 +1,32 @@
+resources:
+  schemas:
+    wanderbricks:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: Wanderbricks sample data loaded by the ${bundle.name} bundle.
+
+  jobs:
+    wanderbricks_etl:
+      name: wanderbricks_etl
+      description: Copies the Wanderbricks sample tables into Unity Catalog and validates row counts.
+      # Runs on serverless compute (no cluster config needed).
+      tasks:
+        - task_key: load_wanderbricks
+          spark_python_task:
+            python_file: ../src/load_wanderbricks.py
+            parameters:
+              - --source-catalog
+              - ${var.source_catalog}
+              - --source-schema
+              - ${var.source_schema}
+              - --target-catalog
+              - ${var.catalog}
+              - --target-schema
+              - ${resources.schemas.wanderbricks.name}
+              - --tables
+              - ${var.tables}
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
