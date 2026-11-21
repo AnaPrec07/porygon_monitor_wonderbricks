@@ -7,7 +7,7 @@ Databricks Asset Bundle that copies the Databricks **Wanderbricks** sample data
 
 - `databricks.yml` – bundle config, variables, `dev` target
 - `resources/wanderbricks_etl.yml` – target schema + serverless job
-- `src/load_wanderbricks.py` – ETL: reads each source table, writes a Delta copy, checks row counts
+- `src/bronze/load_wanderbricks.py` – ETL: reads each source table, writes a Delta copy, checks row counts
 
 ## Deploy and run
 
