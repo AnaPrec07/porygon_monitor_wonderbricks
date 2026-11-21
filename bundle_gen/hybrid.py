@@ -22,7 +22,7 @@ PAUSE_REF = "${var.hybrid_pause_status}"
 
 # Relative to resources/__init__.py, where the resources are registered
 # (the CLI resolves relative paths against the registering file).
-INGEST_SCRIPT = "../src/bronze/load_wanderbricks.py"
+INGEST_SCRIPT = "src/bronze/load_wanderbricks.py"
 DEFAULT_INGEST_CONCURRENCY = 4
 _ENTRY_KEYS = {
     "via", "condition", "wait_after_last_change_seconds", "min_time_between_triggers_seconds",

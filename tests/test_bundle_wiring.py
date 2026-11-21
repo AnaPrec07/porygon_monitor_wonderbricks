@@ -91,4 +91,4 @@ def test_generated_keys_do_not_collide_with_yaml_jobs(built):
 def test_python_generated_paths_exist():
     from bundle_gen.hybrid import INGEST_SCRIPT
 
-    assert (ROOT / "resources" / INGEST_SCRIPT).resolve().is_file()
+    assert (ROOT / INGEST_SCRIPT).resolve().is_file()
