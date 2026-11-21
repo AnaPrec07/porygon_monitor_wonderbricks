@@ -1,0 +1,40 @@
+# Pattern 5 (config-generated): one entry here = one generated job `gen_<name>`.
+#
+# A workflow selects a subset of the graph in nodes.yml; edges between the
+# selected nodes are kept, edges to unselected nodes are dropped. Selectors are
+# unioned:
+#   all:            true            every node
+#   layers:         [silver, gold]  every node in these layers
+#   nodes:          [id, ...]       explicit nodes
+#   downstream_of:  [id, ...]       these nodes and everything that depends on them
+#   include_roots:  true|false      (with downstream_of) keep the roots themselves
+#
+# Optional per workflow: schedule, retries, notify_on_failure, max_concurrent_runs.
+
+defaults:
+  max_concurrent_runs: 1
+  retries:
+    max_retries: 1                  # applied to pipeline tasks only
+    min_retry_interval_millis: 60000
+
+workflows:
+  # Same graph as the hand-written baseline `medallion_orchestrator`.
+  - name: medallion_full
+    description: Bronze ingestion, then silver, then gold (equivalent to medallion_orchestrator).
+    select: { all: true }
+    schedule: { cron: "0 0 6 * * ?", timezone: UTC }
+
+  # Re-run everything derived from bronze after a bronze fix, without reloading bronze.
+  - name: silver_and_gold
+    description: Refresh the silver and gold pipelines from existing bronze tables.
+    select: { layers: [silver, gold] }
+
+  # One lineage branch: the rating pipeline and everything that depends on it.
+  - name: ratings_chain
+    description: Refresh silver average_rating and everything downstream of it.
+    select: { downstream_of: [silver_average_rating] }
+
+  # Cheap refresh for dashboards after a gold-only code change.
+  - name: gold_only
+    description: Refresh only the gold pipelines.
+    select: { layers: [gold] }

@@ -8,6 +8,11 @@ Databricks Asset Bundle that copies the Databricks **Wanderbricks** sample data
 - `databricks.yml` – bundle config, variables, `dev` target
 - `resources/wanderbricks_etl.yml` – target schema + serverless job
 - `src/bronze/load_wanderbricks.py` – ETL: reads each source table, writes a Delta copy, checks row counts
+- `resources/silver`, `resources/gold` – declarative pipelines for the silver and gold layers
+- `resources/orchestration/medallion_job.yml` – baseline orchestrator (bronze, then silver, then gold)
+- `resources/orchestration/event_driven.yml`, `config/orchestration/`, `bundle_gen/`, `resources/__init__.py` – three
+  alternative orchestrations; see [docs/orchestration](docs/orchestration/README.md)
+- `tests/` – offline checks for the generators (`uv sync && uv run pytest`)
 
 ## Deploy and run
 

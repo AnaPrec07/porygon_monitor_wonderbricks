@@ -1,0 +1,72 @@
+# Single source of truth for the medallion graph.
+#
+# Every orchestration alternative (patterns 4, 5 and 6 in docs/orchestration)
+# is built from, or checked against, this file. Edit the graph HERE; the
+# generated alternatives follow, and tests/ fails if the hand-written
+# event-driven YAML drifts from it.
+#
+#   id          unique task / node name (also the task_key in generated jobs)
+#   layer       bronze | silver | gold
+#   domain      ownership group; pattern 6 builds one parent job per domain
+#   kind        ingest   -> runs the bronze loader
+#               pipeline -> runs a Lakeflow pipeline defined under resources/
+#   job         (ingest)   key of the bundle job that loads bronze
+#   pipeline    (pipeline) key of the bundle pipeline resource
+#   depends_on  upstream node ids (the edges)
+#   reads       tables the node reads, as <layer>.<table>. Used to derive the
+#               table-update triggers that carry cross-domain edges.
+#   writes      tables the node produces ("bronze.*" = every table in ${var.tables})
+
+nodes:
+  - id: bronze_ingestion
+    layer: bronze
+    domain: ingestion
+    kind: ingest
+    job: wanderbricks_etl
+    writes: [bronze.*]
+
+  - id: silver_average_rating
+    layer: silver
+    domain: property_quality
+    kind: pipeline
+    pipeline: average_rating
+    depends_on: [bronze_ingestion]
+    reads: [bronze.properties, bronze.reviews]
+    writes: [silver.average_rating]
+
+  - id: silver_user_categories
+    layer: silver
+    domain: user_behaviour
+    kind: pipeline
+    pipeline: user_categories
+    depends_on: [bronze_ingestion]
+    reads: [bronze.users, bronze.page_views, bronze.bookings]
+    writes: [silver.user_categories]
+
+  - id: gold_property_type_ratings
+    layer: gold
+    domain: property_quality
+    kind: pipeline
+    pipeline: gold_property_type_ratings
+    depends_on: [silver_average_rating]
+    reads: [silver.average_rating]
+    writes: [gold.property_type_ratings]
+
+  - id: gold_user_category_summary
+    layer: gold
+    domain: user_behaviour
+    kind: pipeline
+    pipeline: gold_user_category_summary
+    depends_on: [silver_user_categories]
+    reads: [silver.user_categories]
+    writes: [gold.user_category_summary]
+
+  # Cross-domain node: needs one silver table from each of two other domains.
+  - id: gold_engagement_kpis
+    layer: gold
+    domain: executive_kpis
+    kind: pipeline
+    pipeline: gold_engagement_kpis
+    depends_on: [silver_average_rating, silver_user_categories]
+    reads: [silver.average_rating, silver.user_categories]
+    writes: [gold.engagement_kpis]

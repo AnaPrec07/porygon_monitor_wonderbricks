@@ -7,7 +7,27 @@ bundle:
 include:
   - resources/**/*.yml
 
+# Python for bundles: resources:load_resources (resources/__init__.py) generates
+# the config-driven orchestration jobs (patterns 5 and 6). Needs Databricks CLI
+# 0.275+ and `uv sync` (the venv holds databricks-bundles and pyyaml).
+python:
+  venv_path: .venv
+  resources:
+    - "resources:load_resources"
+
 variables:
+  # Pause switches for the orchestration alternatives (docs/orchestration). Each
+  # controls every schedule and trigger of ONE alternative. All default to PAUSED;
+  # arm at most one at a time because they all write the same tables.
+  event_driven_pause_status:
+    description: PAUSED or UNPAUSED for the event-driven jobs (evt_*).
+    default: PAUSED
+  config_generated_pause_status:
+    description: PAUSED or UNPAUSED for the config-generated jobs (gen_*).
+    default: PAUSED
+  hybrid_pause_status:
+    description: PAUSED or UNPAUSED for the hybrid domain jobs (hyb_*).
+    default: PAUSED
   silver_schema:
     description: Schema (created by the bundle) that receives the silver tables.
     default: silver
