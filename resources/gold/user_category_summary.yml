@@ -1,0 +1,13 @@
+resources:
+  pipelines:
+    gold_user_category_summary:
+      name: gold_user_category_summary
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.gold.name}
+      serverless: true
+      configuration:
+        silver_catalog: ${var.catalog}
+        silver_schema: ${var.silver_schema}
+      libraries:
+        - file:
+            path: ../../src/gold/user_category_summary.py

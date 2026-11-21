@@ -1,0 +1,13 @@
+resources:
+  pipelines:
+    gold_engagement_kpis:
+      name: gold_engagement_kpis
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.gold.name}
+      serverless: true
+      configuration:
+        silver_catalog: ${var.catalog}
+        silver_schema: ${var.silver_schema}
+      libraries:
+        - file:
+            path: ../../src/gold/engagement_kpis.py
