@@ -5,13 +5,19 @@ bundle:
   name: porygon_monitor_wonderbricks
 
 include:
-  - resources/*.yml
+  - resources/**/*.yml
 
 variables:
+  silver_schema:
+    description: Schema (created by the bundle) that receives the silver tables.
+    default: silver
+  bronze_schema:
+    description: Schema (created by the bundle) that receives the silver tables.
+    default: bronze
   catalog:
     description: Unity Catalog catalog that receives the loaded tables.
     default: main
-  schema:
+  default_schema:
     description: Schema (created by the bundle) that receives the loaded tables.
     default: wanderbricks
   source_catalog:
