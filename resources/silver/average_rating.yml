@@ -13,7 +13,7 @@ resources:
       serverless: true
       configuration:
         bronze_catalog: ${var.catalog}
-        bronze_schema: ${var.default_schema}
+        bronze_schema: ${var.bronze_schema}
         min_reviews: "5"
         top_n: "10"
       libraries:
