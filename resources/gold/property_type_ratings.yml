@@ -1,0 +1,13 @@
+resources:
+  pipelines:
+    gold_property_type_ratings:
+      name: gold_property_type_ratings
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.gold.name}
+      serverless: true
+      configuration:
+        silver_catalog: ${var.catalog}
+        silver_schema: ${var.silver_schema}
+      libraries:
+        - file:
+            path: ../../src/gold/property_type_ratings.py

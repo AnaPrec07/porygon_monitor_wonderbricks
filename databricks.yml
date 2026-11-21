@@ -11,6 +11,9 @@ variables:
   silver_schema:
     description: Schema (created by the bundle) that receives the silver tables.
     default: silver
+  gold_schema:
+    description: Schema (created by the bundle) that receives the gold tables.
+    default: gold
   bronze_schema:
     description: Schema (created by the bundle) that receives the silver tables.
     default: bronze

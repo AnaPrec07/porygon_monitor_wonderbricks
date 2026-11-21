@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    gold:
+      catalog_name: ${var.catalog}
+      name: ${var.gold_schema}
+      comment: Gold (dashboard-ready) layer built by the ${bundle.name} bundle.
