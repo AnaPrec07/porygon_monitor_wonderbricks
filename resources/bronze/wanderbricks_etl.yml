@@ -15,7 +15,7 @@ resources:
       tasks:
         - task_key: load_wanderbricks
           spark_python_task:
-            python_file: ../src/bronze/load_wanderbricks.py
+            python_file: ../../src/bronze/load_wanderbricks.py
             parameters:
               - --source-catalog
               - ${var.source_catalog}
