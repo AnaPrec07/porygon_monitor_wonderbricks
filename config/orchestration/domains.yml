@@ -1,0 +1,42 @@
+# Pattern 6 (hybrid control plane): one generated parent job `hyb_<domain>` per
+# domain in nodes.yml.
+#
+#   * Edges INSIDE a domain       -> depends_on between tasks of the parent job.
+#   * Edges BETWEEN domains       -> a table-update trigger on the downstream
+#                                    domain job. The watched tables are derived
+#                                    from the `reads` of the domain's entry nodes.
+#   * Repeated work (bronze load) -> a For each task over ${var.tables}.
+#
+# A root domain (no upstream domain) runs on a schedule. Every other domain
+# needs an `entry` trigger. Triggers and schedules are created paused unless
+# the bundle variable `hybrid_pause_status` is UNPAUSED.
+
+defaults:
+  max_concurrent_runs: 1
+
+domains:
+  - name: ingestion
+    schedule: { cron: "0 0 6 * * ?", timezone: UTC }
+    ingest:
+      concurrency: 4               # tables loaded in parallel by the For each task
+
+  - name: property_quality
+    entry:
+      via: table_update
+      condition: ALL_UPDATED       # every watched table must have changed
+      wait_after_last_change_seconds: 120
+      min_time_between_triggers_seconds: 300
+
+  - name: user_behaviour
+    entry:
+      via: table_update
+      condition: ALL_UPDATED
+      wait_after_last_change_seconds: 120
+      min_time_between_triggers_seconds: 300
+
+  - name: executive_kpis
+    entry:
+      via: table_update
+      condition: ALL_UPDATED
+      wait_after_last_change_seconds: 60
+      min_time_between_triggers_seconds: 300
