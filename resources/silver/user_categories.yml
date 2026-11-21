@@ -1,0 +1,14 @@
+resources:
+  pipelines:
+    user_categories:
+      name: user_categories
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.silver.name}
+      serverless: true
+      configuration:
+        bronze_catalog: ${var.catalog}
+        bronze_schema: ${var.bronze_schema}
+        high_intent_views: "10"
+      libraries:
+        - file:
+            path: ../../src/silver/user_categories.py
