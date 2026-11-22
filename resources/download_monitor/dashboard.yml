@@ -1,0 +1,9 @@
+resources:
+  dashboards:
+    download_monitor:
+      display_name: Download monitor
+      file_path: ../../src/download_monitor/dashboards/download_monitor.lvdash.json
+      warehouse_id: ${var.dm_warehouse_id}
+      dataset_catalog: ${var.dm_catalog}
+      dataset_schema: ${resources.schemas.dm_gold.name}
+      embed_credentials: false
