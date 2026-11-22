@@ -1,0 +1,14 @@
+resources:
+  schemas:
+    dm_bronze:
+      catalog_name: ${var.dm_catalog}
+      name: ${var.dm_bronze_schema}
+      comment: Streaming-table copies of Databricks system tables for the download monitor.
+    dm_gold:
+      catalog_name: ${var.dm_catalog}
+      name: ${var.dm_gold_schema}
+      comment: Download monitor facts and suspicious-activity views.
+    dm_export:
+      catalog_name: ${var.dm_catalog}
+      name: ${var.dm_export_schema}
+      comment: Data exported to S3 for other departments.

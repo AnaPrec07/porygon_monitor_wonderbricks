@@ -1,0 +1,16 @@
+# Audit events that count as an explicit data download or export.
+# `channel` is the client channel reported for the event. `ignore_when` skips events whose
+# request_params[param] equals value (for example in-browser result fetches).
+# Source: andyweaves/system-tables-audit-logs, detection data_downloads_from_control_plane.
+# Verify the list against your workspace with docs/download_monitor/discovery.md query 1.
+actions:
+  - {action: downloadPreviewResults, channel: notebook}
+  - {action: downloadLargeResults, channel: notebook}
+  - {action: downloadQueryResult, channel: sql_editor, ignore_when: {param: fileType, equals: arrows}}
+  - {action: workspaceExport, channel: workspace_export, ignore_when: {param: workspaceExportFormat, equals: SOURCE}}
+  - {action: filesGet, channel: files}
+  - {action: getModelVersionDownloadUri, channel: model_registry, enabled: false}
+  - {action: getModelVersionSignedDownloadUri, channel: model_registry, enabled: false}
+
+# request_params keys that may carry the id of the statement behind a download (first non-null wins).
+statement_id_param_keys: [statementId, statement_id, queryId]

@@ -1,0 +1,16 @@
+# Detection thresholds. Starting values: tune after a week of data (see decisions.md).
+large_download_rows: 100000
+large_download_bytes: 1073741824      # 1 GiB
+daily_rows_per_user: 1000000
+burst_downloads_per_hour: 20          # andyweaves threshold for data_downloads_from_control_plane
+
+# Evidence levels that count as "PII download" (column > table > text).
+pii_evidence_levels: [column, table]
+pii_tag_name: PII
+
+# Principals that never raise a suspicious row (scheduled system activity).
+excluded_principals: [System-User]
+
+# Additive risk score, capped at 100.
+risk_weights: {pii: 50, untrusted_ip: 30, large: 20}
+high_risk_score: 80
