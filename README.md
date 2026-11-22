@@ -12,6 +12,7 @@ Databricks Asset Bundle that copies the Databricks **Wanderbricks** sample data
 - `resources/orchestration/medallion_job.yml` – baseline orchestrator (bronze, then silver, then gold)
 - `resources/orchestration/event_driven.yml`, `config/orchestration/`, `bundle_gen/`, `resources/__init__.py` – three
   alternative orchestrations; see [docs/orchestration](docs/orchestration/README.md)
+- `docs/download_monitor/PLAN.md` – plan (not yet built) for monitoring suspicious data downloads from system tables
 - `tests/` – offline checks for the generators (`uv sync && uv run pytest`)
 
 ## Deploy and run
