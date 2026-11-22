@@ -1,0 +1,90 @@
+# SQL alerts v2 over the suspicious-activity views. Each query returns ONE summary row; the alert fires
+# when `total` is above the threshold. Window: last 2 hours, evaluated hourly, which tolerates the delay
+# with which system tables land. Schedules are paused until dm_pause_status = UNPAUSED.
+resources:
+  alerts:
+    dm_pii_download:
+      display_name: "[download monitor] PII data downloaded"
+      custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
+      custom_description: "Downloads of data tagged PII in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      query_text: |
+        SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(risk_score) AS max_risk_score,
+               array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users,
+               array_join(slice(collect_set(download_id), 1, 5), ', ') AS sample_download_ids
+        FROM ${var.dm_catalog}.${var.dm_gold_schema}.suspicious_pii_downloads
+        WHERE pii_evidence = 'column' AND event_time >= current_timestamp() - INTERVAL 2 HOURS
+      warehouse_id: ${var.dm_warehouse_id}
+      evaluation: &evaluation
+        source: {name: total}
+        comparison_operator: GREATER_THAN
+        threshold: {value: {double_value: 0}}
+        empty_result_state: OK
+        notification: &notification
+          notify_on_ok: false
+          retrigger_seconds: 3600
+          subscriptions:
+            - user_email: ${var.dm_alert_emails}
+      schedule: &hourly
+        quartz_cron_schedule: "0 30 * * * ?"
+        timezone_id: UTC
+        pause_status: ${var.dm_pause_status}
+
+    dm_untrusted_ip_download:
+      display_name: "[download monitor] Download from an IP outside the supported list"
+      custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
+      custom_description: "Downloads from IP addresses outside the supported list in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      query_text: |
+        SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(risk_score) AS max_risk_score,
+               array_join(slice(sort_array(collect_set(source_ip)), 1, 5), ', ') AS source_ips,
+               array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users
+        FROM ${var.dm_catalog}.${var.dm_gold_schema}.suspicious_untrusted_ip_downloads
+        WHERE event_time >= current_timestamp() - INTERVAL 2 HOURS
+      warehouse_id: ${var.dm_warehouse_id}
+      evaluation: *evaluation
+      schedule: *hourly
+
+    dm_large_download:
+      display_name: "[download monitor] Large download"
+      custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
+      custom_description: "Large downloads, bursts or high daily volume in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      query_text: |
+        SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(rows_returned) AS max_rows,
+               array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users
+        FROM ${var.dm_catalog}.${var.dm_gold_schema}.suspicious_large_downloads
+        WHERE event_time >= current_timestamp() - INTERVAL 2 HOURS
+      warehouse_id: ${var.dm_warehouse_id}
+      evaluation: *evaluation
+      schedule: *hourly
+
+    dm_high_risk_download:
+      display_name: "[download monitor] High-risk download (risk score 80 or more)"
+      custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
+      custom_description: "Downloads combining several risk factors in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      query_text: |
+        SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(risk_score) AS max_risk_score,
+               array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users,
+               array_join(slice(collect_set(download_id), 1, 5), ', ') AS sample_download_ids
+        FROM ${var.dm_catalog}.${var.dm_gold_schema}.suspicious_downloads
+        WHERE risk_score >= 80 AND event_time >= current_timestamp() - INTERVAL 2 HOURS
+      warehouse_id: ${var.dm_warehouse_id}
+      evaluation: *evaluation
+      schedule: *hourly
+
+    dm_pipeline_stale:
+      display_name: "[download monitor] No new audit data (pipeline stale)"
+      custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
+      custom_description: "No audit events landed in bronze for over 6 hours, so the detections are blind. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      query_text: |
+        SELECT coalesce(timestampdiff(HOUR, max(event_time), current_timestamp()), 9999) AS hours_since_last_audit
+        FROM ${var.dm_catalog}.${var.dm_bronze_schema}.bronze_audit
+      warehouse_id: ${var.dm_warehouse_id}
+      evaluation:
+        source: {name: hours_since_last_audit}
+        comparison_operator: GREATER_THAN
+        threshold: {value: {double_value: 6}}
+        empty_result_state: OK
+        notification: *notification
+      schedule:
+        quartz_cron_schedule: "0 40 */3 * * ?"
+        timezone_id: UTC
+        pause_status: ${var.dm_pause_status}

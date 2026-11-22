@@ -1,12 +1,7 @@
 import json
 import re
 
-import pytest
-
 from dashboards import build_dashboard as B
-from dm_common import gold_logic as G, suspicious_logic as S
-from dm_common.config_data import CONFIG
-from tests.download_monitor.test_gold_core import RANGES_ROWS, make_world
 from tests.helpers import ROOT, refs_in, yaml_resources
 
 FILE = ROOT / "src" / "download_monitor" / "dashboards" / "download_monitor.lvdash.json"
@@ -32,19 +27,8 @@ def test_widget_names_unique_and_datasets_exist():
     assert len(names) == len(set(names))
 
 
-@pytest.fixture(scope="module")
-def views(spark):
-    a, history, cl, tl, cols, tbls = make_world(spark)
-    ranges = G.ref_ip_ranges(spark, RANGES_ROWS)
-    fct = G.build_fct_data_downloads(a, history, cl, tl, cols, tbls, ranges, CONFIG)
-    flagged = S.with_flags(fct, CONFIG["thresholds"])
-    fct.createOrReplaceTempView("fct_data_downloads")
-    S.suspicious_downloads(flagged).createOrReplaceTempView("suspicious_downloads")
-    S.daily_summary(flagged).createOrReplaceTempView("daily_download_summary")
-    return spark
-
-
-def test_every_dataset_query_runs_and_every_widget_field_exists(views):
+def test_every_dataset_query_runs_and_every_widget_field_exists(gold_views):
+    views = gold_views
     d = json.loads(FILE.read_text(encoding="utf-8"))
     columns = {}
     for ds in d["datasets"]:
