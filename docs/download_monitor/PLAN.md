@@ -1,6 +1,6 @@
 # Plan: data download monitor on Databricks system tables
 
-Status: **plan only, nothing built yet.** This document describes what will be added to this bundle, in which
+Status: **plan only, nothing built yet.** The work is split into sequential PRs in [prs/](prs/README.md). This document describes what will be added to this bundle, in which
 order, and what has to be confirmed in the workspace before each step.
 
 The goal is to find **suspicious data downloads**:
