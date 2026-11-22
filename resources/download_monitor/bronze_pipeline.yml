@@ -1,0 +1,16 @@
+resources:
+  pipelines:
+    dm_bronze:
+      name: dm_bronze
+      description: Streaming tables copied from system.access and system.query for the download monitor.
+      catalog: ${var.dm_catalog}
+      schema: ${resources.schemas.dm_bronze.name}
+      serverless: true
+      continuous: false   # system tables land with a delay, so a triggered run is enough
+      channel: CURRENT
+      root_path: ../../src/download_monitor
+      configuration:
+        bronze_start_date: ${var.dm_bronze_start_date}
+      libraries:
+        - file:
+            path: ../../src/download_monitor/bronze/system_tables.py
