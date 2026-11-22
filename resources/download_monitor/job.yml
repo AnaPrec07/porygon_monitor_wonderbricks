@@ -17,6 +17,11 @@ resources:
         on_failure:
           - ${var.dm_alert_emails}
 
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
+
       tasks:
         - task_key: bronze
           pipeline_task:
@@ -27,3 +32,24 @@ resources:
             - task_key: bronze
           pipeline_task:
             pipeline_id: ${resources.pipelines.dm_gold.id}
+
+        # Skips (and succeeds) while dm_export_s3_url is empty. See docs/download_monitor/export.md.
+        - task_key: export
+          depends_on:
+            - task_key: gold
+          environment_key: default
+          spark_python_task:
+            python_file: ../../src/download_monitor/export/export_to_s3.py
+            parameters:
+              - --catalog
+              - ${var.dm_catalog}
+              - --gold-schema
+              - ${resources.schemas.dm_gold.name}
+              - --export-schema
+              - ${resources.schemas.dm_export.name}
+              - --s3-url
+              - ${var.dm_export_s3_url}
+              - --salt-scope
+              - ${var.dm_export_salt_scope}
+              - --salt-key
+              - ${var.dm_export_salt_key}

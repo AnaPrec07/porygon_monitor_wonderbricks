@@ -105,7 +105,7 @@ def test_gold_pipeline_registers_suspicious_views():
 
 def test_job_graph_and_defaults():
     job = yaml_resources("jobs")["download_monitor"]
-    assert edges(job["tasks"]) == {("bronze", "gold")}
+    assert edges(job["tasks"]) == {("bronze", "gold"), ("gold", "export")}
     assert job["schedule"]["pause_status"] == "${var.dm_pause_status}"
     assert job["max_concurrent_runs"] == 1
     assert job["email_notifications"]["on_failure"]

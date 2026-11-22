@@ -50,6 +50,12 @@ variables:
   dm_export_s3_url:
     description: S3 prefix of the external location used by the export (s3://bucket/path).
     default: ""
+  dm_export_salt_scope:
+    description: Secret scope that holds the salt used to hash emails and IPs in the S3 export.
+    default: download_monitor
+  dm_export_salt_key:
+    description: Secret key (in dm_export_salt_scope) with the export salt.
+    default: export_salt
   dm_pause_status:
     description: PAUSED or UNPAUSED for the download monitor job schedule and alerts.
     default: PAUSED
