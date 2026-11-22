@@ -1,6 +1,6 @@
 # Plan: data download monitor on Databricks system tables
 
-Status: **plan only, nothing built yet.** The work is split into sequential PRs in [prs/](prs/README.md). This document describes what will be added to this bundle, in which
+Status: **implemented in PRs 1 to 8 (see [README.md](README.md) for the as-built description); PR 0 still needs your workspace.** The original plan follows; differences are listed in [gold.md](gold.md). The work is split into sequential PRs in [prs/](prs/README.md). This document describes what will be added to this bundle, in which
 order, and what has to be confirmed in the workspace before each step.
 
 The goal is to find **suspicious data downloads**:
