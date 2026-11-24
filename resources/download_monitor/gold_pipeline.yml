@@ -1,0 +1,17 @@
+resources:
+  pipelines:
+    dm_gold:
+      name: dm_gold
+      description: Materialized views for the download monitor (facts, PII dimensions, suspicious activity).
+      catalog: ${var.dm_catalog}
+      schema: ${resources.schemas.dm_gold.name}
+      serverless: true
+      continuous: false
+      channel: CURRENT
+      root_path: ../../src/download_monitor
+      configuration:
+        bronze_catalog: ${var.dm_catalog}
+        bronze_schema: ${var.dm_bronze_schema}
+      libraries:
+        - file:
+            path: ../../src/download_monitor/gold/core.py
