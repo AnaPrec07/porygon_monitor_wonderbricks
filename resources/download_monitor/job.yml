@@ -1,0 +1,29 @@
+resources:
+  jobs:
+    download_monitor:
+      name: download_monitor
+      description: Hourly download monitor refresh - bronze streaming tables, then gold materialized views.
+      tags:
+        layer: orchestration
+        project: download_monitor
+      performance_target: STANDARD
+      max_concurrent_runs: 1
+      # Hourly at minute 20; alerts run a few minutes later. Armed with dm_pause_status.
+      schedule:
+        quartz_cron_expression: "0 20 * * * ?"
+        timezone_id: UTC
+        pause_status: ${var.dm_pause_status}
+      email_notifications:
+        on_failure:
+          - ${var.dm_alert_emails}
+
+      tasks:
+        - task_key: bronze
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.dm_bronze.id}
+
+        - task_key: gold
+          depends_on:
+            - task_key: bronze
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.dm_gold.id}

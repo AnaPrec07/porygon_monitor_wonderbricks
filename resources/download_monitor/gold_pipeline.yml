@@ -15,3 +15,5 @@ resources:
       libraries:
         - file:
             path: ../../src/download_monitor/gold/core.py
+        - file:
+            path: ../../src/download_monitor/gold/suspicious.py
