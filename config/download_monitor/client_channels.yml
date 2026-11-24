@@ -1,0 +1,28 @@
+# Maps system.query.history rows to a client channel. First matching rule wins.
+# Conditions inside `any` are OR-ed. Fields:
+#   client_application, client_driver: matched case-insensitively with `contains`
+#   dashboard_id, legacy_dashboard_id, genie_space_id, notebook_id: query_source.<field>, with `not_null: true`
+# Patterns are guesses until docs/download_monitor/discovery.md query 3 is run.
+rules:
+  - channel: dashboard
+    any: [{field: dashboard_id, not_null: true}, {field: legacy_dashboard_id, not_null: true}]
+  - channel: genie
+    any: [{field: genie_space_id, not_null: true}]
+  - channel: notebook
+    any: [{field: notebook_id, not_null: true}]
+  - channel: excel
+    any: [{field: client_application, contains: excel}, {field: client_driver, contains: excel}]
+  - channel: sql_editor
+    any: [{field: client_application, contains: sql editor}, {field: client_application, contains: databricks sql}]
+  - channel: api_connector
+    any: [{field: client_driver, contains: python}, {field: client_driver, contains: nodejs},
+          {field: client_driver, contains: go}, {field: client_application, contains: statement execution}]
+  - channel: odbc_jdbc_other
+    any: [{field: client_driver, contains: odbc}, {field: client_driver, contains: jdbc},
+          {field: client_driver, contains: simba}, {field: client_application, contains: power bi},
+          {field: client_application, contains: tableau}]
+
+default_channel: other
+
+# Channels whose query results are downloads in themselves (the client pulls the rows).
+external_client_channels: [excel, odbc_jdbc_other, api_connector]

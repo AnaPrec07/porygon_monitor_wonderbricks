@@ -1,0 +1,20 @@
+# Columns of dm_gold.suspicious_downloads that leave the company data platform (PR 7).
+# Anything not listed here is never exported. `hash` columns are SHA-256 hashed with a salt.
+export_window_days: 3
+columns:
+  - {name: download_id}
+  - {name: event_time}
+  - {name: event_date}
+  - {name: workspace_id}
+  - {name: user_email, hash: true}
+  - {name: channel}
+  - {name: download_kind}
+  - {name: action_name}
+  - {name: rows_returned}
+  - {name: read_bytes}
+  - {name: source_ip, hash: true}
+  - {name: ip_status}
+  - {name: pii_evidence}
+  - {name: pii_tag_values}
+  - {name: reasons}
+  - {name: risk_score}

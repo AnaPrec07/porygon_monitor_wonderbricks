@@ -28,6 +28,34 @@ variables:
   hybrid_pause_status:
     description: PAUSED or UNPAUSED for the hybrid domain jobs (hyb_*).
     default: PAUSED
+  # ---- download monitor (docs/download_monitor) ----
+  dm_catalog:
+    description: Catalog that receives the download monitor schemas.
+    default: main
+  dm_bronze_schema:
+    description: Schema for the streaming tables copied from the system tables.
+    default: dm_bronze
+  dm_gold_schema:
+    description: Schema for the download monitor materialized views.
+    default: dm_gold
+  dm_export_schema:
+    description: Schema for the external table exported to S3.
+    default: dm_export
+  dm_warehouse_id:
+    description: SQL warehouse id for the dashboard and alerts. Replace the placeholder before arming them.
+    default: "REPLACE_WITH_WAREHOUSE_ID"
+  dm_alert_emails:
+    description: Email that receives the download monitor alerts.
+    default: "security@example.com"
+  dm_export_s3_url:
+    description: S3 prefix of the external location used by the export (s3://bucket/path).
+    default: ""
+  dm_pause_status:
+    description: PAUSED or UNPAUSED for the download monitor job schedule and alerts.
+    default: PAUSED
+  dm_bronze_start_date:
+    description: Optional lower bound (YYYY-MM-DD) for the first bronze backfill; empty copies everything.
+    default: ""
   silver_schema:
     description: Schema (created by the bundle) that receives the silver tables.
     default: silver
