@@ -60,3 +60,10 @@ def test_query_runs_and_returns_the_source_column(gold_views, name):
         assert row["total"] == EXPECTED_TOTAL[name]
     else:
         assert row["hours_since_last_audit"] is not None
+
+
+def test_every_alert_has_a_runbook_section():
+    runbook = (ROOT / "docs" / "download_monitor" / "runbook.md").read_text(encoding="utf-8")
+    for name, a in ALERTS.items():
+        assert f"## {name}\n" in runbook, name
+        assert f"runbook.md#{name}" in a["custom_description"]

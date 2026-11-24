@@ -37,3 +37,9 @@ PRs 5, 6 and 7 only depend on PR 4, so they can be reviewed in parallel, but mer
 
 The three test downloads from PR 0 (Excel, dashboard, SQL editor CSV) appear in `fct_data_downloads` with the right
 channel, IP, rows and PII evidence, trigger the matching alert, show in the dashboard, and arrive in the S3 export.
+
+## Status
+
+PRs 1 to 8 are implemented, one commit per PR, in this order, on branch `claude/awesome-einstein-ugzk7u`.
+PR 0 (discovery) is a checklist that still needs a workspace: [../discovery.md](../discovery.md).
+Nothing has been deployed or run against a real workspace; see "Known limits" in [../README.md](../README.md).

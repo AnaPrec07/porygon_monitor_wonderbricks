@@ -6,7 +6,7 @@ resources:
     dm_pii_download:
       display_name: "[download monitor] PII data downloaded"
       custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
-      custom_description: "Downloads of data tagged PII in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      custom_description: "Downloads of data tagged PII in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}. Runbook: docs/download_monitor/runbook.md#dm_pii_download"
       query_text: |
         SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(risk_score) AS max_risk_score,
                array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users,
@@ -32,7 +32,7 @@ resources:
     dm_untrusted_ip_download:
       display_name: "[download monitor] Download from an IP outside the supported list"
       custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
-      custom_description: "Downloads from IP addresses outside the supported list in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      custom_description: "Downloads from IP addresses outside the supported list in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}. Runbook: docs/download_monitor/runbook.md#dm_untrusted_ip_download"
       query_text: |
         SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(risk_score) AS max_risk_score,
                array_join(slice(sort_array(collect_set(source_ip)), 1, 5), ', ') AS source_ips,
@@ -46,7 +46,7 @@ resources:
     dm_large_download:
       display_name: "[download monitor] Large download"
       custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
-      custom_description: "Large downloads, bursts or high daily volume in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      custom_description: "Large downloads, bursts or high daily volume in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}. Runbook: docs/download_monitor/runbook.md#dm_large_download"
       query_text: |
         SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(rows_returned) AS max_rows,
                array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users
@@ -59,7 +59,7 @@ resources:
     dm_high_risk_download:
       display_name: "[download monitor] High-risk download (risk score 80 or more)"
       custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
-      custom_description: "Downloads combining several risk factors in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      custom_description: "Downloads combining several risk factors in the last 2 hours. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}. Runbook: docs/download_monitor/runbook.md#dm_high_risk_download"
       query_text: |
         SELECT count(*) AS total, count(DISTINCT user_email) AS users, max(risk_score) AS max_risk_score,
                array_join(slice(sort_array(collect_set(user_email)), 1, 5), ', ') AS top_users,
@@ -73,7 +73,7 @@ resources:
     dm_pipeline_stale:
       display_name: "[download monitor] No new audit data (pipeline stale)"
       custom_summary: "{{ALERT_NAME}} changed status to {{ALERT_STATUS}}"
-      custom_description: "No audit events landed in bronze for over 6 hours, so the detections are blind. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}."
+      custom_description: "No audit events landed in bronze for over 6 hours, so the detections are blind. {{QUERY_RESULT_TABLE}} Open {{ALERT_URL}}. Runbook: docs/download_monitor/runbook.md#dm_pipeline_stale"
       query_text: |
         SELECT coalesce(timestampdiff(HOUR, max(event_time), current_timestamp()), 9999) AS hours_since_last_audit
         FROM ${var.dm_catalog}.${var.dm_bronze_schema}.bronze_audit
