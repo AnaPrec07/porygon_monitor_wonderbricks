@@ -116,6 +116,10 @@ def test_latest_query_row_wins(spark):
 
 @pytest.fixture
 def world(spark):
+    return make_world(spark)
+
+
+def make_world(spark):
     """Four statements: excel on PII column, dashboard on PII table, plain sql, excel clean."""
     pii_ct = spark.createDataFrame([("main", "hr", "emp", "ssn", "PII", "ssn")],
                                    "catalog_name string, schema_name string, table_name string, column_name string, tag_name string, tag_value string")

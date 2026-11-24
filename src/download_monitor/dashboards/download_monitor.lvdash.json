@@ -1,0 +1,2199 @@
+{
+  "datasets": [
+    {
+      "name": "downloads",
+      "displayName": "All downloads",
+      "queryLines": [
+        "SELECT download_id, event_time, event_date, workspace_id, user_email, channel, download_kind, action_name, rows_returned, read_bytes, source_ip, ip_status, ip_attribution, pii_evidence, pii_columns, pii_tag_values FROM fct_data_downloads"
+      ]
+    },
+    {
+      "name": "suspicious",
+      "displayName": "Suspicious downloads",
+      "queryLines": [
+        "SELECT download_id, event_time, event_date, workspace_id, user_email, channel, download_kind, action_name, rows_returned, read_bytes, source_ip, ip_status, ip_attribution, pii_evidence, pii_columns, pii_tag_values, reasons, risk_score FROM suspicious_downloads"
+      ]
+    },
+    {
+      "name": "daily",
+      "displayName": "Daily summary",
+      "queryLines": [
+        "SELECT event_date, workspace_id, channel, download_kind, downloads, users, rows_downloaded, pii_downloads, untrusted_ip_downloads, large_downloads, suspicious_downloads FROM daily_download_summary"
+      ]
+    },
+    {
+      "name": "pii_tags",
+      "displayName": "PII downloads by tag",
+      "queryLines": [
+        "SELECT event_date, channel, user_email, tag AS pii_tag FROM fct_data_downloads LATERAL VIEW explode(pii_tag_values) t AS tag WHERE pii_evidence IN ('column', 'table')"
+      ]
+    },
+    {
+      "name": "ips",
+      "displayName": "IP addresses",
+      "queryLines": [
+        "SELECT event_date, channel, source_ip, ip_status, user_email, download_id FROM fct_data_downloads WHERE source_ip IS NOT NULL"
+      ]
+    },
+    {
+      "name": "freshness",
+      "displayName": "Freshness",
+      "queryLines": [
+        "SELECT max(event_time) AS last_download_time, count(*) AS total_downloads FROM fct_data_downloads"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "overview",
+      "displayName": "Overview",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "f_date",
+            "queries": [
+              {
+                "name": "q_downloads",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "q_daily",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_downloads",
+                    "displayName": "Date"
+                  },
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_suspicious",
+                    "displayName": "Date"
+                  },
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_daily",
+                    "displayName": "Date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_channel",
+            "queries": [
+              {
+                "name": "q_downloads",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "q_daily",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "Channel"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_downloads",
+                    "displayName": "Channel"
+                  },
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_suspicious",
+                    "displayName": "Channel"
+                  },
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_daily",
+                    "displayName": "Channel"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_user",
+            "queries": [
+              {
+                "name": "q_downloads",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "User"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_downloads",
+                    "displayName": "User"
+                  },
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_suspicious",
+                    "displayName": "User"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "c_downloads",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "SUM(`downloads`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "Downloads"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "c_susp",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "SUM(`suspicious_downloads`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "Suspicious downloads"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "Suspicious"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 2,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "c_pii",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "SUM(`pii_downloads`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "PII downloads"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "PII"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "c_ip",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "SUM(`untrusted_ip_downloads`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "Untrusted IP downloads"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "Untrusted IP"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "c_rows",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "SUM(`rows_downloaded`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "Rows downloaded"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "Rows"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "l_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "SUM(`downloads`)"
+                    },
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "showTitle": true,
+                "title": "Downloads per day by channel"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "event_date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "event_date"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                },
+                "color": {
+                  "fieldName": "channel",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "channel"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b_risk",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "risk_score",
+                      "expression": "`risk_score`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "Suspicious downloads by risk score"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "risk_score",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "risk_score"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 6,
+            "height": 5
+          }
+        }
+      ]
+    },
+    {
+      "name": "triage",
+      "displayName": "Triage",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "f_date",
+            "queries": [
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_suspicious",
+                    "displayName": "Date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_channel",
+            "queries": [
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "Channel"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_suspicious",
+                    "displayName": "Channel"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_user",
+            "queries": [
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "User"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_suspicious",
+                    "displayName": "User"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "t_triage",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "risk_score",
+                      "expression": "`risk_score`"
+                    },
+                    {
+                      "name": "reasons",
+                      "expression": "`reasons`"
+                    },
+                    {
+                      "name": "event_time",
+                      "expression": "`event_time`"
+                    },
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    },
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    },
+                    {
+                      "name": "source_ip",
+                      "expression": "`source_ip`"
+                    },
+                    {
+                      "name": "ip_status",
+                      "expression": "`ip_status`"
+                    },
+                    {
+                      "name": "rows_returned",
+                      "expression": "`rows_returned`"
+                    },
+                    {
+                      "name": "pii_evidence",
+                      "expression": "`pii_evidence`"
+                    },
+                    {
+                      "name": "pii_columns",
+                      "expression": "`pii_columns`"
+                    },
+                    {
+                      "name": "workspace_id",
+                      "expression": "`workspace_id`"
+                    },
+                    {
+                      "name": "download_id",
+                      "expression": "`download_id`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "showTitle": true,
+                "title": "Suspicious downloads (highest risk first)"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "risk_score",
+                    "displayName": "risk_score"
+                  },
+                  {
+                    "fieldName": "reasons",
+                    "displayName": "reasons"
+                  },
+                  {
+                    "fieldName": "event_time",
+                    "displayName": "event_time"
+                  },
+                  {
+                    "fieldName": "user_email",
+                    "displayName": "user_email"
+                  },
+                  {
+                    "fieldName": "channel",
+                    "displayName": "channel"
+                  },
+                  {
+                    "fieldName": "source_ip",
+                    "displayName": "source_ip"
+                  },
+                  {
+                    "fieldName": "ip_status",
+                    "displayName": "ip_status"
+                  },
+                  {
+                    "fieldName": "rows_returned",
+                    "displayName": "rows_returned"
+                  },
+                  {
+                    "fieldName": "pii_evidence",
+                    "displayName": "pii_evidence"
+                  },
+                  {
+                    "fieldName": "pii_columns",
+                    "displayName": "pii_columns"
+                  },
+                  {
+                    "fieldName": "workspace_id",
+                    "displayName": "workspace_id"
+                  },
+                  {
+                    "fieldName": "download_id",
+                    "displayName": "download_id"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 14
+          }
+        }
+      ]
+    },
+    {
+      "name": "sensitive",
+      "displayName": "Sensitive data",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "f_date",
+            "queries": [
+              {
+                "name": "q_pii_tags",
+                "query": {
+                  "datasetName": "pii_tags",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_pii_tags",
+                    "displayName": "Date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_channel",
+            "queries": [
+              {
+                "name": "q_pii_tags",
+                "query": {
+                  "datasetName": "pii_tags",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "Channel"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_pii_tags",
+                    "displayName": "Channel"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_user",
+            "queries": [
+              {
+                "name": "q_pii_tags",
+                "query": {
+                  "datasetName": "pii_tags",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "User"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_pii_tags",
+                    "displayName": "User"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "b_tag",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "pii_tags",
+                  "fields": [
+                    {
+                      "name": "pii_tag",
+                      "expression": "`pii_tag`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "PII downloads by tag value"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "pii_tag",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "pii_tag"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b_evidence",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "pii_evidence",
+                      "expression": "`pii_evidence`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "Downloads by PII evidence level"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "pii_evidence",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "pii_evidence"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b_pii_user",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "pii_tags",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "PII downloads by user"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "user_email",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "user_email"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ]
+    },
+    {
+      "name": "large",
+      "displayName": "Large downloads",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "f_date",
+            "queries": [
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_suspicious",
+                    "displayName": "Date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_channel",
+            "queries": [
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "Channel"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_suspicious",
+                    "displayName": "Channel"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_user",
+            "queries": [
+              {
+                "name": "q_suspicious",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "User"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_suspicious",
+                    "displayName": "User"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "b_rows_user",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "SUM(`rows_returned`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "Rows downloaded by user (suspicious downloads)"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "user_email",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "user_email"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Rows"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "t_large",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "suspicious",
+                  "fields": [
+                    {
+                      "name": "rows_returned",
+                      "expression": "`rows_returned`"
+                    },
+                    {
+                      "name": "read_bytes",
+                      "expression": "`read_bytes`"
+                    },
+                    {
+                      "name": "event_time",
+                      "expression": "`event_time`"
+                    },
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    },
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    },
+                    {
+                      "name": "reasons",
+                      "expression": "`reasons`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "showTitle": true,
+                "title": "Largest downloads"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "rows_returned",
+                    "displayName": "rows_returned"
+                  },
+                  {
+                    "fieldName": "read_bytes",
+                    "displayName": "read_bytes"
+                  },
+                  {
+                    "fieldName": "event_time",
+                    "displayName": "event_time"
+                  },
+                  {
+                    "fieldName": "user_email",
+                    "displayName": "user_email"
+                  },
+                  {
+                    "fieldName": "channel",
+                    "displayName": "channel"
+                  },
+                  {
+                    "fieldName": "reasons",
+                    "displayName": "reasons"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 8
+          }
+        }
+      ]
+    },
+    {
+      "name": "ips",
+      "displayName": "IP addresses",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "f_date",
+            "queries": [
+              {
+                "name": "q_ips",
+                "query": {
+                  "datasetName": "ips",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_ips",
+                    "displayName": "Date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_channel",
+            "queries": [
+              {
+                "name": "q_ips",
+                "query": {
+                  "datasetName": "ips",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "Channel"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_ips",
+                    "displayName": "Channel"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_user",
+            "queries": [
+              {
+                "name": "q_ips",
+                "query": {
+                  "datasetName": "ips",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "User"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_ips",
+                    "displayName": "User"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "b_ip_status",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ips",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "ip_status",
+                      "expression": "`ip_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "Downloads by IP status"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "event_date",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "event_date"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                },
+                "color": {
+                  "fieldName": "ip_status",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "ip_status"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b_ip_top",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ips",
+                  "fields": [
+                    {
+                      "name": "source_ip",
+                      "expression": "`source_ip`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "ip_status",
+                      "expression": "`ip_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "Top source IPs"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "source_ip",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "source_ip"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                },
+                "color": {
+                  "fieldName": "ip_status",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "ip_status"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "displayName": "User drill-down",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "f_date",
+            "queries": [
+              {
+                "name": "q_downloads",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "event_date",
+                      "expression": "`event_date`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "event_date",
+                    "queryName": "q_downloads",
+                    "displayName": "Date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_channel",
+            "queries": [
+              {
+                "name": "q_downloads",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "Channel"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "channel",
+                    "queryName": "q_downloads",
+                    "displayName": "Channel"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f_user",
+            "queries": [
+              {
+                "name": "q_downloads",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "frame": {
+                "showTitle": true,
+                "title": "User"
+              },
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "user_email",
+                    "queryName": "q_downloads",
+                    "displayName": "User"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "t_user",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "event_time",
+                      "expression": "`event_time`"
+                    },
+                    {
+                      "name": "user_email",
+                      "expression": "`user_email`"
+                    },
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    },
+                    {
+                      "name": "action_name",
+                      "expression": "`action_name`"
+                    },
+                    {
+                      "name": "rows_returned",
+                      "expression": "`rows_returned`"
+                    },
+                    {
+                      "name": "source_ip",
+                      "expression": "`source_ip`"
+                    },
+                    {
+                      "name": "ip_status",
+                      "expression": "`ip_status`"
+                    },
+                    {
+                      "name": "pii_evidence",
+                      "expression": "`pii_evidence`"
+                    },
+                    {
+                      "name": "download_kind",
+                      "expression": "`download_kind`"
+                    },
+                    {
+                      "name": "download_id",
+                      "expression": "`download_id`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "showTitle": true,
+                "title": "All downloads"
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "event_time",
+                    "displayName": "event_time"
+                  },
+                  {
+                    "fieldName": "user_email",
+                    "displayName": "user_email"
+                  },
+                  {
+                    "fieldName": "channel",
+                    "displayName": "channel"
+                  },
+                  {
+                    "fieldName": "action_name",
+                    "displayName": "action_name"
+                  },
+                  {
+                    "fieldName": "rows_returned",
+                    "displayName": "rows_returned"
+                  },
+                  {
+                    "fieldName": "source_ip",
+                    "displayName": "source_ip"
+                  },
+                  {
+                    "fieldName": "ip_status",
+                    "displayName": "ip_status"
+                  },
+                  {
+                    "fieldName": "pii_evidence",
+                    "displayName": "pii_evidence"
+                  },
+                  {
+                    "fieldName": "download_kind",
+                    "displayName": "download_kind"
+                  },
+                  {
+                    "fieldName": "download_id",
+                    "displayName": "download_id"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 14
+          }
+        }
+      ]
+    },
+    {
+      "name": "quality",
+      "displayName": "Data quality",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "q_last",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "freshness",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "MAX(`last_download_time`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "Last download seen"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "Last download time"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "q_total",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "freshness",
+                  "fields": [
+                    {
+                      "name": "value",
+                      "expression": "SUM(`total_downloads`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "showTitle": true,
+                "title": "Downloads in the fact table"
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "value",
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "q_attr",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "ip_attribution",
+                      "expression": "`ip_attribution`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "IP attribution quality"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "ip_attribution",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "ip_attribution"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "q_pii",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "pii_evidence",
+                      "expression": "`pii_evidence`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "PII evidence levels"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "pii_evidence",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "pii_evidence"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "q_status",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "downloads",
+                  "fields": [
+                    {
+                      "name": "ip_status",
+                      "expression": "`ip_status`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "showTitle": true,
+                "title": "IP status"
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "ip_status",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "ip_status"
+                },
+                "y": {
+                  "fieldName": "value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Downloads"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 5
+          }
+        }
+      ]
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGN_AUTO"
+    }
+  }
+}
